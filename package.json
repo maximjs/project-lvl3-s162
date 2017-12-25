@@ -1,0 +1,40 @@
+{
+  "name": "page-loader-utility",
+  "version": "0.0.1",
+  "bin": {
+    "page-loader": "dist/bin/page-loader.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/maximjs/project-lvl3-s162"
+  },
+  "author": "Maxim Kozlyakov",
+  "devDependencies": {
+    "babel-cli": "*",
+    "babel-core": "*",
+    "babel-eslint": "*",
+    "babel-preset-env": "*",
+    "babel-preset-stage-0": "*",
+    "eslint": "*",
+    "eslint-config-airbnb-base": "*",
+    "eslint-plugin-import": "*",
+    "jest": "*",
+    "nock": "^9.1.5"
+  },
+  "scripts": {
+    "babel-node": "babel-node",
+    "build": "set NODE_ENV=production && babel src --out-dir dist --source-maps inline",
+    "prepublish": "npm run build",
+    "eslint": "eslint src/",
+    "run": "npm run babel-node -- src/bin/page-loader.js",
+    "test": "jest"
+  },
+  "dependencies": {
+    "axios": "^0.17.1",
+    "commander": "^2.12.2",
+    "mz": "^2.7.0"
+  }
+}
