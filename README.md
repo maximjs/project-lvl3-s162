@@ -6,7 +6,8 @@ Downloads web page to the local drive.
 
 npm install page-loader-utility
 
-Usage: page-loader [options] \<http address to save\>
+Usage: page-loader [options] \<http address\>
+http address - fully with protocol (http://...)
 
 Options:
 

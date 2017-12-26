@@ -6,8 +6,8 @@ program
   .version('0.0.1')
   .usage('[options] <Output directory> <http address to save>')
   .description('Downloads web page')
-  .option('-o, --output [dir]', 'Output directory')
+  .option('-o, --output [dir]', 'Output directory', './')
   .action((httpAddr) => {
-    pageLoader(program.output || './', httpAddr);
+    pageLoader(program.output, httpAddr);
   });
 program.parse(process.argv);

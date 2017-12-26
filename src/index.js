@@ -16,7 +16,7 @@ const pageLoader = (dir, httpAddr) => {
   const fileName = getFileName(httpAddr);
   const pathToFile = path.resolve(path.normalize(dir), fileName);
   return axios.get(httpAddr).then(res =>
-    fs.writeFile(pathToFile, res.data, 'utf8'));
+    fs.writeFile(pathToFile, res.data, 'utf8')).then(console.log('Done!'));
 };
 
 export default pageLoader;
