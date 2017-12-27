@@ -4,6 +4,7 @@ import axios from 'axios';
 import url from 'url';
 import path from 'path';
 import cheerio from 'cheerio';
+import debug from 'debug';
 
 require('babel-polyfill');
 
@@ -13,6 +14,7 @@ const getFileName = (httpAddr) => {
   const hostArr = urlAddress.hostname.split('.');
   const nameArr = [...hostArr, ...pathArr];
   const fileName = `${nameArr.join('-')}.html`;
+  debug('page-loader:html_file_name')(fileName);
   return fileName;
 };
 
@@ -25,6 +27,7 @@ const getTagDirFileName = (httpAddr, src) => {
   const pathAddress = url.parse(src);
   const fileNameArr = pathAddress.pathname === '/' ? [] : pathAddress.pathname.split('/').slice(1);
   const fileName = `${fileNameArr.join('-')}`;
+  debug('page-loader:source_dir_and_name')(dirName, fileName);
   return [dirName, fileName];
 };
 
@@ -36,6 +39,7 @@ const sourceTypes = {
 
 // On promises
 const pageLoader = (dir, httpAddr) => {
+  debug('page-loader:current_folder_and_httpAddress')(dir, httpAddr);
   const fileName = getFileName(httpAddr);
   const pathToFile = path.resolve(path.normalize(dir), fileName);
   const filesNameAddrArr = [];
@@ -64,9 +68,11 @@ const pageLoader = (dir, httpAddr) => {
                     headers: { 'Accept-Encoding': 'gzip' },
                     responseType: 'stream',
                   })
-                    .then(response =>
-                      response.data.pipe(fs.createWriteStream(path.resolve(path
-                        .normalize(dir), path.join(el[0], el[1])))))));
+                    .then((response) => {
+                      debug('page-loader:http_request_and_response_status')(el[2], response.status);
+                      return response.data.pipe(fs.createWriteStream(path.resolve(path
+                        .normalize(dir), path.join(el[0], el[1]))));
+                    })));
           }
         });
     });
@@ -74,6 +80,7 @@ const pageLoader = (dir, httpAddr) => {
 
 // On async/await
 // const pageLoader = async (dir, httpAddr) => {
+//   debug('page-loader:current_folder_and_httpAddress')(dir, httpAddr);
 //   const fileName = getFileName(httpAddr);
 //   const pathToFile = path.resolve(path.normalize(dir), fileName);
 //   const filesNameAddrArr = [];
@@ -99,6 +106,7 @@ const pageLoader = (dir, httpAddr) => {
 //         headers: { 'Accept-Encoding': 'gzip' },
 //         responseType: 'stream',
 //       });
+//       debug('page-loader:http_request_and_response_status')(el[2], response.status);
 //       response.data.pipe(fs.createWriteStream(path.resolve(path
 //         .normalize(dir), path.join(el[0], el[1]))));
 //     });
