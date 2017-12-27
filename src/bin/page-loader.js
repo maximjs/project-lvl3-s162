@@ -3,7 +3,7 @@ import program from 'commander';
 import pageLoader from '..';
 
 program
-  .version('0.0.1')
+  .version('0.0.3')
   .usage('[options] <Output directory> <http address to save>')
   .description('Downloads web page')
   .option('-o, --output [dir]', 'Output directory', './')

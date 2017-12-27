@@ -1,9 +1,10 @@
 {
   "name": "page-loader-utility",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "bin": {
     "page-loader": "dist/bin/page-loader.js"
   },
+  "main": "dist/index.js",
   "files": [
     "dist"
   ],
@@ -36,12 +37,16 @@
   },
   "jest": {
     "collectCoverage": true,
-    "coverageReporters": ["lcov"],
+    "coverageReporters": [
+      "lcov"
+    ],
     "testEnvironment": "node",
     "verbose": true
   },
   "dependencies": {
     "axios": "^0.17.1",
+    "babel-polyfill": "^6.26.0",
+    "cheerio": "^1.0.0-rc.2",
     "commander": "^2.12.2",
     "mz": "^2.7.0"
   }

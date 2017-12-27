@@ -1,0 +1,23 @@
+body
+{background-color: #AAFFFF;}
+
+.primer
+{
+border: 3px solid blue;
+position: absolute; top:200px; left:300px; height:500px; width:500px;
+}
+
+a
+{color:#B619FF; font-weight: bold;}
+
+a:hover
+{color:#ff0000; font-weight: bold; text-decoration:none;}
+
+h1
+{color: #0000ff; font-size:18px;}
+
+h2
+{color: #9E0037; font-size:16px;}
+
+p
+{color: green; font-size:14px;}
