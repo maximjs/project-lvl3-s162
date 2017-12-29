@@ -25,6 +25,5 @@ test('Download a web page to the file with sources', async () => {
   nock(host).get('/attachments/test1.jpg').reply(200, nockJpg);
   await pageLoader(folder, host);
   const expectResult = await fsMz.readFile(path.join(folder, 'www-moogle-com.html'), 'utf8');
-  console.log(folder);
   expect(expectResult).toBe(result);
 });
