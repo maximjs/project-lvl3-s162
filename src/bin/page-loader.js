@@ -4,14 +4,18 @@ import pageLoader from '..';
 
 let httpAddrValue;
 program
-  .version('0.0.5')
+  .version('0.1.0')
   .usage('[options] <Output directory> <http address to save>')
   .description('Downloads web page')
   .option('-o, --output [dir]', 'Output directory', './')
   .action((httpAddr) => {
     httpAddrValue = httpAddr;
+    // console.log('----');
     pageLoader(program.output, httpAddr)
-      .catch(() => process.exit(1));
+      .catch((error) => {
+        console.error(error.message);
+        process.exit(1);
+      });
   });
 
 program.parse(process.argv);

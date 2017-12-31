@@ -5,6 +5,8 @@ import url from 'url';
 import path from 'path';
 import cheerio from 'cheerio';
 import debug from 'debug';
+import Multispinner from 'multispinner';
+import figures from 'figures';
 
 const log = debug('page-loader:');
 
@@ -43,25 +45,61 @@ const sourceTypes = {
   link: 'href',
 };
 
-const getSourceData = (filesNameAddr) => {
-  const { data } = filesNameAddr;
-  const dataPromiseArr = data.map((el) => {
-    const sourceUrl = el.source;
-    return axios({
-      method: 'get',
-      url: sourceUrl,
-      headers: { 'Accept-Encoding': 'gzip' },
-      responseType: 'stream',
+const options = {
+  indent: 2,
+  interval: 250,
+  frames: ['-', '\\', '|', '/'],
+  autoStart: true,
+  clear: true,
+  preText: 'Downoading',
+  color: {
+    incomplete: 'cyan',
+    success: 'green',
+    error: 'red',
+  },
+  symbol: {
+    success: figures.tick,
+    error: figures.cross,
+  },
+};
+
+const getArrLinks = arr => arr.reduce((acc, el) => [...acc, el.source], []);
+
+const download = (sourceData, spinnerID, spinners) => {
+  const sourceUrl = sourceData.source;
+  return axios({
+    method: 'get',
+    url: sourceUrl,
+    headers: { 'Accept-Encoding': 'gzip' },
+    responseType: 'stream',
+  })
+    .then((response) => {
+      spinners.success(spinnerID);
+      log(`http request: ${sourceUrl} and response status: ${response.status}`);
+      return { ...sourceData, data: response.data };
     })
-      .then((response) => {
-        log(`http request: ${sourceUrl} and response status: ${response.status}`);
-        return { ...el, data: response.data };
-      }, (error) => {
-        console.error(`Can\`t download a source file ${sourceUrl}, error ${error.response.status}`);
-        throw error;
-      });
-  });
-  return Promise.all(dataPromiseArr);
+    .catch((error) => {
+      spinners.error(spinnerID);
+      const newError = { ...error, message: `${sourceUrl} ${error.message}` };
+      throw newError;
+    });
+};
+
+const getSourceData = (filesNameAddr) => {
+  const linksArr = getArrLinks(filesNameAddr.data);
+  const spinners = new Multispinner(linksArr, options);
+  return Promise.all(filesNameAddr.data.reduce((acc, sourceData) => {
+    const urlAddr = sourceData.source;
+    acc.push(download(sourceData, urlAddr, spinners));
+    return acc;
+  }, []))
+    .then((results) => {
+      spinners.on('done', () => results);
+      return results;
+    })
+    .catch((err) => {
+      throw err;
+    });
 };
 
 // On promises
@@ -86,11 +124,10 @@ const pageLoader = (dir, httpAddr) => {
       });
       return $;
     }, (error) => {
-      console.error(`Can\`t download page ${httpAddr}, error ${error.response.status}`);
-      throw error;
+      const newError = { ...error, message: `${httpAddr} ${error.message}` };
+      throw newError;
     })
     .then($ => fsMz.writeFile(pathToFile, $.html(), 'utf8'), (error) => {
-      console.error(`Can\`t write html file ${pathToFile}, error ${error.code || ''}`);
       throw error;
     })
     .then(() => {
@@ -100,10 +137,11 @@ const pageLoader = (dir, httpAddr) => {
       const { newDirName } = filesNameAddr;
       return fsMz.mkdir(path.resolve(path.normalize(dir), newDirName));
     }, (error) => {
-      console.error(`Can\`t create folder for source files, error ${error.code || ''}`);
       throw error;
     })
-    .then(() => getSourceData(filesNameAddr))
+    .then(() => getSourceData(filesNameAddr), (error) => {
+      throw error;
+    })
     .then((dataResponseArr) => {
       dataResponseArr.forEach((el) => {
         const { newDirName } = filesNameAddr;
@@ -111,6 +149,8 @@ const pageLoader = (dir, httpAddr) => {
         data.pipe(fs.createWriteStream(path.resolve(path
           .normalize(dir), path.join(newDirName, newFileName))));
       });
+    }, (error) => {
+      throw error;
     });
 };
 
