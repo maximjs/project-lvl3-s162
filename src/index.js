@@ -5,8 +5,6 @@ import url from 'url';
 import path from 'path';
 import cheerio from 'cheerio';
 import debug from 'debug';
-import Multispinner from 'multispinner';
-import figures from 'figures';
 
 const log = debug('page-loader:');
 
@@ -45,71 +43,56 @@ const sourceTypes = {
   link: 'href',
 };
 
-const options = {
-  indent: 2,
-  interval: 250,
-  frames: ['-', '\\', '|', '/'],
-  autoStart: true,
-  clear: true,
-  preText: 'Downoading',
-  color: {
-    incomplete: 'cyan',
-    success: 'green',
-    error: 'red',
-  },
-  symbol: {
-    success: figures.tick,
-    error: figures.cross,
-  },
+const listrFiles = (ctx, data) => {
+  if (!ctx) {
+    return null;
+  }
+  ctx.links = data;
+  return ctx.links;
+};
+
+const listrPage = (ctx, data) => {
+  if (!ctx) {
+    return null;
+  }
+  ctx.page = data;
+  return ctx.page;
 };
 
 const getArrLinks = arr => arr.reduce((acc, el) => [...acc, el.source], []);
 
-const download = (sourceData, spinnerID, spinners) => {
-  const sourceUrl = sourceData.source;
-  return axios({
-    method: 'get',
-    url: sourceUrl,
-    headers: { 'Accept-Encoding': 'gzip' },
-    responseType: 'stream',
-  })
-    .then((response) => {
-      spinners.success(spinnerID);
-      log(`http request: ${sourceUrl} and response status: ${response.status}`);
-      return { ...sourceData, data: response.data };
-    })
-    .catch((error) => {
-      spinners.error(spinnerID);
-      const newError = { ...error, message: `${sourceUrl} ${error.message}` };
-      throw newError;
-    });
-};
-
-const getSourceData = (filesNameAddr) => {
+const getSourceData = (filesNameAddr, ctx) => {
   const linksArr = getArrLinks(filesNameAddr.data);
-  const spinners = new Multispinner(linksArr, options);
-  return Promise.all(filesNameAddr.data.reduce((acc, sourceData) => {
-    const urlAddr = sourceData.source;
-    acc.push(download(sourceData, urlAddr, spinners));
-    return acc;
-  }, []))
-    .then((results) => {
-      spinners.on('done', () => results);
-      return results;
+  listrFiles(ctx, linksArr);
+  const { data } = filesNameAddr;
+  const dataPromiseArr = data.map((el) => {
+    const sourceUrl = el.source;
+    return axios({
+      method: 'get',
+      url: sourceUrl,
+      headers: { 'Accept-Encoding': 'gzip' },
+      responseType: 'stream',
     })
-    .catch((err) => {
-      throw err;
-    });
+      .then((response) => {
+        log(`http request: ${sourceUrl} and response status: ${response.status}`);
+        return { ...el, data: response.data };
+      }, (error) => {
+        const newError = { ...error, message: `${sourceUrl} ${error.message}` };
+        throw newError;
+      });
+  });
+  return Promise.all(dataPromiseArr);
 };
 
 // On promises
-const pageLoader = (dir, httpAddr) => {
+const pageLoader = (dir, httpAddr, ctx) => {
   log(`current folder: ${dir} and httpAddress: ${httpAddr}`);
   const fileName = getFileName(httpAddr);
   const pathToFile = path.resolve(path.normalize(dir), fileName);
   const filesNameAddr = { data: [] };
   return axios.get(httpAddr)
     .then((res) => {
+      listrPage(ctx, httpAddr);
       const $ = cheerio.load(res.data);
       $('script, img, link').each((i, el) => {
         const tagName = el.name;
@@ -139,7 +122,7 @@ const pageLoader = (dir, httpAddr) => {
     }, (error) => {
       throw error;
     })
-    .then(() => getSourceData(filesNameAddr), (error) => {
+    .then(() => getSourceData(filesNameAddr, ctx), (error) => {
       throw error;
     })
     .then((dataResponseArr) => {
