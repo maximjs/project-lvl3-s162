@@ -1,6 +1,6 @@
 {
   "name": "page-loader-utility",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "bin": {
     "page-loader": "dist/bin/page-loader.js"
   },

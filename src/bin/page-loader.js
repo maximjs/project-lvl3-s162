@@ -36,7 +36,7 @@ const tasks = (httpAddr, dir) => new Listr([
 ]);
 
 program
-  .version('0.1.0')
+  .version('0.1.1')
   .usage('[options] <Output directory> <http address to save>')
   .description('Downloads web page')
   .option('-o, --output [dir]', 'Output directory', './')

@@ -110,21 +110,15 @@ const pageLoader = (dir, httpAddr, ctx) => {
       const newError = { ...error, message: `${httpAddr} ${error.message}` };
       throw newError;
     })
-    .then($ => fsMz.writeFile(pathToFile, $.html(), 'utf8'), (error) => {
-      throw error;
-    })
+    .then($ => fsMz.writeFile(pathToFile, $.html(), 'utf8'))
     .then(() => {
       if (filesNameAddr.data.length === 0) {
         return Promise.reject(new Error('There is no resources to save'));
       }
       const { newDirName } = filesNameAddr;
       return fsMz.mkdir(path.resolve(path.normalize(dir), newDirName));
-    }, (error) => {
-      throw error;
     })
-    .then(() => getSourceData(filesNameAddr, ctx), (error) => {
-      throw error;
-    })
+    .then(() => getSourceData(filesNameAddr, ctx))
     .then((dataResponseArr) => {
       dataResponseArr.forEach((el) => {
         const { newDirName } = filesNameAddr;
@@ -132,8 +126,6 @@ const pageLoader = (dir, httpAddr, ctx) => {
         data.pipe(fs.createWriteStream(path.resolve(path
           .normalize(dir), path.join(newDirName, newFileName))));
       });
-    }, (error) => {
-      throw error;
     });
 };
 
