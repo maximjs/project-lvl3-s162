@@ -11,7 +11,7 @@ $ npm install page-loader-utility
 ```
 $ page-loader [options] <http address>
 ```
-<http address> - полный адрес с указанием протокола (http://...)
+/<http address/> - полный адрес с указанием протокола (http://...)
 
 Options:  
 * -V --version, display the version number
