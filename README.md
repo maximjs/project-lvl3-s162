@@ -27,7 +27,7 @@ Options:
 * Работа с ошибками и исключениями
 * Знакомство с модулями nodejs: os, path, fs, url
 * Работа с DOM. Базовые манипуляции
-* Promises, Async/Await
+* Асинхронный код: Promises, Async/Await
 * Работа с HTTP
 
 
